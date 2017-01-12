@@ -5,7 +5,10 @@ import com.theironyard.entities.Chirp;
 import com.theironyard.entities.User;
 import com.theironyard.repositories.ChirpRepository;
 import com.theironyard.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -24,11 +28,22 @@ import java.util.List;
 @Controller
 public class ChirpController {
 
+    public static final Logger log = LoggerFactory.getLogger(ChirpController.class);
+
     @Autowired
     ChirpRepository chirpRepository;
 
     @Autowired
     UserRepository userRepository;
+
+    @Value("${foo.bar}")
+    private String foobar;
+
+    @PostConstruct
+    public void init(){
+        System.out.println(foobar);
+        log.info(foobar);
+    }
 
     @RequestMapping(path = "/", method = RequestMethod.GET)
     public String getChirps(HttpSession session, Model model){
@@ -44,6 +59,7 @@ public class ChirpController {
         Chirp chirp = chirpRepository.findOne(chirpId);
 
         if(chirp == null){
+            log.debug("Issued Chirp 404: " + chirpId);
             return "404";
         }
 
